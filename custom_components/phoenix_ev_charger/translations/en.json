@@ -1,0 +1,23 @@
+{
+  "config": {
+    "title": "Phoenix EV charger",
+    "step": {
+      "user": {
+        "title": "Define your Phoenix EV charger modbus connection",
+        "data": {
+          "host": "The ip-address of your Phoenix EV charger device",
+          "name": "The prefix to be used for your Phoenix EV charger sensors",
+          "port": "The TCP port on which to connect to the Phoenix EV charger",
+          "scan_interval": "The polling frequency of the modbus registers in seconds",
+          "device_model": "The Phoenix EV charger hardware model (Until now, only EV-CC-AC1-M3-xx types are supported)"
+        }
+      }
+    },
+    "error": {
+      "already_configured": "Device is already configured"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  }
+}

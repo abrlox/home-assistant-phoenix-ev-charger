@@ -1,0 +1,11 @@
+{
+  "domain": "phoenix_ev_charger",
+  "name": "Phoenix EV charger",
+  "version": "1.0.0",
+  "documentation": "https://github.com/abrlox/home-assistant-phoenix-ev-charger",
+  "issue_tracker": "https://github.com/abrlox/home-assistant-phoenix-ev-charger/issues",
+  "requirements": ["pymodbus==2.3.0"],
+  "dependencies": [],
+  "codeowners": ["@abrlox"],
+  "config_flow": true
+}
