@@ -13,18 +13,35 @@ PHOENIX_DEVICE_VARIANTS = {
 }
 
 SENSOR_TYPES = {
-    "SN": ["Serial Number", "sn", None, None],
+    "DeviceState": ["Device State (A-F)", "devstate", None, None],
+    "EnergyChargeSequence": ["Energy Charge Sequence", "chargesequence", "Wh", "mdi:energy"],
+    "ActualChargeCurrentSetting": ["Actual Charge Current Setting", "chargecurrentsetting", "A",
+                                   "remoteChargeCurrentLimitation"],
+    "RemoteChargeCurrentLimitation": ["Remote Charge Current Limitation", "remotechargecurrentlimit", "A",
+                                      "remoteChargeCurrentLimitation"],
+    "CableAssemblyCapability": ["Capability of Cable Assembly", "cablecapability", "A",
+                                "remoteChargeCurrentLimitation"],
+    "ActiveChargingDuration": ["Active Charging Duration", "chargingduration", "s", "mdi:time"],
+    "DigInLD": ["Digital In LD", "diginld", None, None],
+    "DigInEN": ["Digital In EN", "diginen", None, None],
+    "DigInML": ["Digital In ML", "diginml", None, None],
+    "DigInXR": ["Digital In XR", "diginxr", None, None],
+    "DigInIN": ["Digital In IN", "diginin", None, None],
+    "DigOutER": ["Digital Out ER", "digouter", None, None],
+    "DigOutLR": ["Digital Out LR", "digoutlr", None, None],
+    "DigOutVR": ["Digital Out VR", "digoutvr", None, None],
+    "DigOutCR": ["Digital Out CR", "digoutcr", None, None],
     "DeviceName": ["Device name", "devicename", None, None],
-    "Current": ["Current (PWM)", "current", "A", "mdi:current-ac"],
-    "DeviceState": ["Device state", "devstate", None, None],
-    "FirmwareVersion" : [ "Firmware version", "fwvers", None, None],
+    "MacAddress": ["MAC address", "macaddress", None, None],
+    "SerialNumber": ["Serial Number", "serialnr", None, None],
+    "FirmwareVersion": ["Firmware version", "fwvers", None, None],
 }
 
 DEVICE_STATUSSES = {
-    'A' : "State A",
-    'B' : "State B",
-    'C' : "State C",
-    'D' : "Errorstate D",
-    'E' : "Errorstate E",
+    '0': "offline",
+    'A': "State A",
+    'B': "State B",
+    'C': "State C",
+    'D': "Errorstate D",
+    'E': "Errorstate E",
 }
-

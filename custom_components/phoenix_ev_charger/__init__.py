@@ -165,73 +165,85 @@ class PEVCModbusHub:
             return self._client.read_holding_registers(address, count, **kwargs)
 
     def read_input_registers(self, unit, address, count):
-        """Read holding registers."""
+        """Read input registers."""
         with self._lock:
             kwargs = {"unit": unit} if unit else {}
             return self._client.read_input_registers(address, count, **kwargs)
 
+    def read_coils(self, unit, address, count):
+        """Read coil registers."""
+        with self._lock:
+            kwargs = {"unit": unit} if unit else {}
+            return self._client.read_coils(address, count, **kwargs)
+
     def calculate_value(self, value, sf):
         return value * 10 ** sf
 
-    def swapAscii(self, str, length):
+    def swap_ascii(self, istr, length):
         ostr = ''
         for i in range(int(length/2)):
-            ostr = ostr + str[i*2+1] 
-            ostr = ostr + str[i*2] 
-        return ostr;
+            ostr = ostr + istr[i * 2 + 1]
+            ostr = ostr + istr[i * 2]
+        return ostr
 
     def read_modbus_data(self):
         return (
-            self.read_modbus_inverter_data()
-            and self.read_modbus_realtime_data()
+            self.read_modbus_holding_data()
+            and self.read_modbus_input_data()
+            and self.read_modbus_coil_data()
+            and self.read_modbus_discrete_data()
         )
 
-    def read_modbus_inverter_data(self):
+    def read_modbus_holding_data(self):
         connected = False
         try:
-            inverter_data = self.read_holding_registers(
-                unit=255, address=300, count=32)
+            holdingreg_data = self.read_holding_registers(unit=255, address=300, count=32)
             connected = True
         except ConnectionException as ex:
             _LOGGER.error('Reading inverter data failed! Inverter is unreachable.')
             connected = False
 
         if connected:
-            if not inverter_data.isError():
+            if not holdingreg_data.isError():
                 decoder = BinaryPayloadDecoder.fromRegisters(
-                    inverter_data.registers, byteorder=Endian.Big
+                    holdingreg_data.registers, byteorder=Endian.Big
                 )
 
-                chargingCurrent = decoder.decode_16bit_uint()
-                self.data["current"] = chargingCurrent
-                macaddress1 = decoder.decode_16bit_uint()
-                macaddress2 = decoder.decode_16bit_uint()
-                macaddress3 = decoder.decode_16bit_uint()
+                charging_current = decoder.decode_16bit_uint()
+                self.data["chargecurrentsetting"] = charging_current
+                macstring = ''
+                for by in range(6):
+                    addr = decoder.decode_8bit_uint()
+                    macstring = macstring + str(hex(addr))
+                self.data["macaddress"] = str(macstring)
 
                 sn = decoder.decode_string(12).decode('ascii')
-                self.data["sn"] = str( self.swapAscii( sn, 12))
+                self.data["serialnr"] = str(self.swap_ascii(sn, 12))
 
-                devName = decoder.decode_string(10).decode('ascii')
-                self.data["devicename"] = str( self.swapAscii( devName, 10))
+                dev_name = decoder.decode_string(10).decode('ascii')
+                self.data["devicename"] = str(self.swap_ascii(dev_name, 10))
 
-                ip = decoder.decode_32bit_uint()
-                ip = decoder.decode_32bit_uint()
-                subnet = decoder.decode_32bit_uint()
-                subnet = decoder.decode_32bit_uint()
-                gateway = decoder.decode_32bit_uint()
-                gateway = decoder.decode_32bit_uint()
+                # ip address
+                decoder.skip_bytes(4*2)
+                # subnet mask
+                decoder.skip_bytes(4*2)
+                # gateway
+                decoder.skip_bytes(4*2)
 
-                digOut = decoder.decode_16bit_uint() 
-                digOut = decoder.decode_16bit_uint() 
-                digOut = decoder.decode_16bit_uint() 
-                digOut = decoder.decode_16bit_uint() 
+                dig_out = decoder.decode_16bit_uint()
+                self.data["digouter"] = str(hex(dig_out))
+                dig_out = decoder.decode_16bit_uint()
+                self.data["digoutlr"] = str(hex(dig_out))
+                dig_out = decoder.decode_16bit_uint()
+                self.data["digoutvr"] = str(hex(dig_out))
+                dig_out = decoder.decode_16bit_uint()
+                self.data["digoutcr"] = str(hex(dig_out))
 
                 return True
             else:
-
                 return False
         else:
-            mpvmode = 0
+            mpvmode = '0'
             self.data["devstate"] = mpvmode
 
             if mpvmode in DEVICE_STATUSSES:
@@ -239,58 +251,84 @@ class PEVCModbusHub:
             else:
                 self.data["devstate"] = "Unknown"
 
-            power = 0
-            self.data["power"] = power
-
             return True
 
-    def read_modbus_realtime_data(self):
+    def read_modbus_input_data(self):
         connected = False
         try:
-            realtime_data = self.read_input_registers(
-                unit=255, address=100, count=57)
+            inputreg_data = self.read_input_registers(unit=255, address=100, count=57)
             connected = True
         except ConnectionException as ex:
-            _LOGGER.error('Reading realtime data failed! Inverter is unreachable.')
+            _LOGGER.error('Reading inputregisters failed! Inverter is unreachable.')
             connected = False
 
-        if False and connected:
-            if not realtime_data.isError():
+        if connected:
+            if not inputreg_data.isError():
                 decoder = BinaryPayloadDecoder.fromRegisters(
-                    realtime_data.registers, byteorder=Endian.Big
+                    inputreg_data.registers, byteorder=Endian.Big
                 )
 
-                mpvmode = decoder.decode_string(2).decode('ascii')
-                self.data["mpvmode"] = mpvmode
+                devstatus = decoder.decode_string(2).decode('ascii')
+                self.data["devstate"] = devstatus
 
-                if mpvmode in DEVICE_STATUSSES:
-                    self.data["mpvstatus"] = DEVICE_STATUSSES[mpvmode]
-                else:
-                    self.data["mpvstatus"] = "Unknown"
+                if devstatus in DEVICE_STATUSSES:
+                    self.data["devstate"] = DEVICE_STATUSSES[devstatus]
 
-                maxCableCurrent = decoder.decode_16bit_uint()
-                chargingTime    = decoder.decode_32bit_uint()
-                dipSwitches     = decoder.decode_16bit_uint()
+                max_cable_current = decoder.decode_16bit_uint()
+                self.data["cablecapability"] = str(max_cable_current)
 
-                fwVersion = decoder.decode_string(4).decode('ascii')
-                self.data["fwvers"] = str( self.swapAscii( fwVersion, 4))
+                charging_time = decoder.decode_32bit_uint()
+                self.data["chargingduration"] = str(charging_time)
+
+                dip_switches = decoder.decode_16bit_uint()
+
+                fw_version = decoder.decode_string(4).decode('ascii')
+                self.data["fwvers"] = str(self.swap_ascii(fw_version, 4))
                 
-                errcodes1 = decoder.decode_16bit_uint()
+                # errcodes1 = decoder.decode_16bit_uint()
                 return True
             else:
 
                 return False
         else:
-            mpvmode = 0
+            mpvmode = '0'
             self.data["devstate"] = mpvmode
 
             if mpvmode in DEVICE_STATUSSES:
                 self.data["devstate"] = DEVICE_STATUSSES[mpvmode]
-            else:
-                self.data["devstate"] = "Unknown"
-
-            power = 0
-            self.data["power"] = power
 
             return True
 
+    def read_modbus_coil_data(self):
+        return True
+
+    def read_modbus_discrete_data(self):
+        connected = False
+        try:
+            discretereg_data = self.read_modbus_discrete_data(unit=255, address=200, count=9)
+            connected = True
+        except ConnectionException as ex:
+            _LOGGER.error('Reading discrete registers failed! Inverter is unreachable.')
+            connected = False
+
+        if connected:
+            if not discretereg_data.isError():
+                decoder = BinaryPayloadDecoder.fromRegisters(
+                    discretereg_data.registers, byteorder=Endian.Big
+                )
+
+                # devstatus = decoder.decode_16bit_uint()
+                # self.data["devstate"] = devstatus
+
+                return True
+            else:
+
+                return False
+        else:
+            mpvmode = '0'
+            self.data["devstate"] = mpvmode
+
+            if mpvmode in DEVICE_STATUSSES:
+                self.data["devstate"] = DEVICE_STATUSSES[mpvmode]
+
+            return True
