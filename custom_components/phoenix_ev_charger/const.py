@@ -35,6 +35,15 @@ SENSOR_TYPES = {
     "MacAddress": ["MAC address", "macaddress", None, None],
     "SerialNumber": ["Serial Number", "serialnr", None, None],
     "FirmwareVersion": ["Firmware version", "fwvers", None, None],
+    "StatusDigInLD": ["Status Digital In LD", "statdiginld", None, None],
+    "StatusDigInEN": ["Status Digital In EN", "statdiginen", None, None],
+    "StatusDigInML": ["Status Digital In ML", "statdiginml", None, None],
+    "StatusDigInXR": ["Status Digital In XR", "statdiginxr", None, None],
+    "StatusDigInIN": ["Status Digital In IN", "statdiginin", None, None],
+    "StatusDigOutER": ["Status Digital Out ER", "statdigouter", None, None],
+    "StatusDigOutLR": ["Status Digital Out LR", "statdigoutlr", None, None],
+    "StatusDigOutVR": ["Status Digital Out VR", "statdigoutvr", None, None],
+    "StatusDigOutCR": ["Status Digital Out CR", "statdigoutcr", None, None],
 }
 
 DEVICE_STATUSSES = {
@@ -112,4 +121,9 @@ DIGITAL_IN_FUNCTIONS = {
     19: "Ladestrom auf zulässigen Maximalwert",
     20: "Ladevorgang pausieren (OCPP: Suspend EVSE)",
     21: "Fehlerzustand erzeugen",
+}
+
+DIGITAL_STATUS = {
+    False: "Off",
+    True: "On",
 }

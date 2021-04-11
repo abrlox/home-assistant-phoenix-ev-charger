@@ -19,7 +19,7 @@ from pymodbus.payload import BinaryPayloadDecoder
 
 from .const import (DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DEVICE_STATUSSES,
                     DOMAIN, CONF_DEVICE_MODEL, DEFAULT_DEVICE_MODEL,
-                    DIGITAL_OUT_FUNCTIONS, DIGITAL_IN_FUNCTIONS)
+                    DIGITAL_OUT_FUNCTIONS, DIGITAL_IN_FUNCTIONS, DIGITAL_STATUS)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -171,6 +171,12 @@ class PEVCModbusHub:
             kwargs = {"unit": unit} if unit else {}
             return self._client.read_input_registers(address, count, **kwargs)
 
+    def read_discrete_inputs(self, unit, address, count):
+        """Read discrete registers."""
+        with self._lock:
+            kwargs = {"unit": unit} if unit else {}
+            return self._client.read_discrete_inputs(address, count, **kwargs)
+
     def read_coils(self, unit, address, count):
         """Read coil registers."""
         with self._lock:
@@ -321,7 +327,7 @@ class PEVCModbusHub:
     def read_modbus_discrete_data(self):
         connected = False
         try:
-            discretereg_data = self.read_modbus_discrete_data(unit=255, address=200, count=9)
+            discretereg_data = self.read_discrete_inputs(unit=255, address=200, count=9)
             connected = True
         except ConnectionException as ex:
             _LOGGER.error('Reading discrete registers failed! Inverter is unreachable.')
@@ -329,12 +335,17 @@ class PEVCModbusHub:
 
         if connected:
             if not discretereg_data.isError():
-                decoder = BinaryPayloadDecoder.fromRegisters(
-                    discretereg_data.registers, byteorder=Endian.Big
-                )
                 _LOGGER.warning('Reading discrete data succeeded')
-                # devstatus = decoder.decode_16bit_uint()
-                # self.data["devstate"] = devstatus
+
+                self.data["statdiginld" ] = str(DIGITAL_STATUS[discretereg_data.getBit(0)])
+                self.data["statdiginen" ] = str(DIGITAL_STATUS[discretereg_data.getBit(1)])
+                self.data["statdiginml" ] = str(DIGITAL_STATUS[discretereg_data.getBit(2)])
+                self.data["statdiginxr" ] = str(DIGITAL_STATUS[discretereg_data.getBit(3)])
+                self.data["statdiginin" ] = str(DIGITAL_STATUS[discretereg_data.getBit(8)])
+                self.data["statdigouter"] = str(DIGITAL_STATUS[discretereg_data.getBit(4)])
+                self.data["statdigoutlr"] = str(DIGITAL_STATUS[discretereg_data.getBit(5)])
+                self.data["statdigoutvr"] = str(DIGITAL_STATUS[discretereg_data.getBit(6)])
+                self.data["statdigoutcr"] = str(DIGITAL_STATUS[discretereg_data.getBit(7)])
 
                 return True
             else:
