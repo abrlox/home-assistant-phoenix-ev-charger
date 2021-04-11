@@ -92,7 +92,7 @@ DIGITAL_IN_FUNCTIONS = {
     0: "Inaktiv1Freigabe Ladevorgang permanentes High-Signal (Default für Eingang EN)",
     2: "Verfügbarkeit Ladestation (Default für Eingang XR)",
     3: "Rückmeldung Verriegelung Ladestecker (Default für Eingang LD)",
-    V: "erriegelung (permanentes High-Signal)",
+    4: "Verriegelung (permanentes High-Signal)",
     5: "Schützüberwachung über NO-Hilfskontakt",
     6: "Schützüberwachung über NC-Hilfskontakt",
     7: "PWM-Signal auf 5 %",
