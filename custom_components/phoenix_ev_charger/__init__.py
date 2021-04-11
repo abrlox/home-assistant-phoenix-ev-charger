@@ -92,12 +92,12 @@ class PEVCModbusHub:
     """Thread safe wrapper class for pymodbus."""
 
     def __init__(
-        self,
-        hass,
-        name,
-        host,
-        port,
-        scan_interval,
+            self,
+            hass,
+            name,
+            host,
+            port,
+            scan_interval,
     ):
         """Initialize the Modbus hub."""
         self._hass = hass
@@ -181,7 +181,7 @@ class PEVCModbusHub:
 
     def swap_ascii(self, istr, length):
         ostr = ''
-        for i in range(int(length/2)):
+        for i in range(int(length / 2)):
             ostr = ostr + istr[i * 2 + 1]
             ostr = ostr + istr[i * 2]
         return ostr
@@ -189,9 +189,9 @@ class PEVCModbusHub:
     def read_modbus_data(self):
         return (
             self.read_modbus_holding_data()
-            and self.read_modbus_input_data()
-            and self.read_modbus_coil_data()
-            and self.read_modbus_discrete_data()
+            #            and self.read_modbus_input_data()
+            #            and self.read_modbus_coil_data()
+            #            and self.read_modbus_discrete_data()
         )
 
     def read_modbus_holding_data(self):
@@ -200,7 +200,7 @@ class PEVCModbusHub:
             holdingreg_data = self.read_holding_registers(unit=255, address=300, count=32)
             connected = True
         except ConnectionException as ex:
-            _LOGGER.error('Reading inverter data failed! Inverter is unreachable.')
+            _LOGGER.error('Reading holding data failed! Inverter is unreachable.')
             connected = False
 
         if connected:
@@ -208,7 +208,7 @@ class PEVCModbusHub:
                 decoder = BinaryPayloadDecoder.fromRegisters(
                     holdingreg_data.registers, byteorder=Endian.Big
                 )
-
+                _LOGGER.warning('Reading holding data succeeded')
                 charging_current = decoder.decode_16bit_uint()
                 self.data["chargecurrentsetting"] = charging_current
                 macstring = ''
@@ -224,11 +224,11 @@ class PEVCModbusHub:
                 self.data["devicename"] = str(self.swap_ascii(dev_name, 10))
 
                 # ip address
-                decoder.skip_bytes(4*2)
+                decoder.skip_bytes(4 * 2)
                 # subnet mask
-                decoder.skip_bytes(4*2)
+                decoder.skip_bytes(4 * 2)
                 # gateway
-                decoder.skip_bytes(4*2)
+                decoder.skip_bytes(4 * 2)
 
                 dig_out = decoder.decode_16bit_uint()
                 self.data["digouter"] = str(hex(dig_out))
@@ -284,7 +284,7 @@ class PEVCModbusHub:
 
                 fw_version = decoder.decode_string(4).decode('ascii')
                 self.data["fwvers"] = str(self.swap_ascii(fw_version, 4))
-                
+
                 # errcodes1 = decoder.decode_16bit_uint()
                 return True
             else:
