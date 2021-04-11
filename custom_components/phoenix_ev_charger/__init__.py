@@ -191,8 +191,8 @@ class PEVCModbusHub:
         return (
             self.read_modbus_holding_data()
             and self.read_modbus_input_data()
-            #            and self.read_modbus_coil_data()
-            #            and self.read_modbus_discrete_data()
+            and self.read_modbus_coil_data()
+            and self.read_modbus_discrete_data()
         )
 
     def read_modbus_holding_data(self):
@@ -214,8 +214,8 @@ class PEVCModbusHub:
                 self.data["chargecurrentsetting"] = charging_current
                 macstring = ''
                 for by in range(3):
-                    addr = decoder.decode_16bit_uint()
-                    macstring = macstring + str(hex(addr))[2:3] + ':' + str(hex(addr))[4:5] + ':'
+                    addr = '{0:04x}'.format(decoder.decode_16bit_uint())
+                    macstring = macstring + addr[2:4] + ':' + addr[0:2] + ':'
                 self.data["macaddress"] = str(macstring)[:-1]
 
                 sn = decoder.decode_string(12).decode('ascii')
@@ -272,7 +272,7 @@ class PEVCModbusHub:
     def read_modbus_input_data(self):
         connected = False
         try:
-            inputreg_data = self.read_input_registers(unit=255, address=100, count=57)
+            inputreg_data = self.read_input_registers(unit=255, address=100, count=10)
             connected = True
         except ConnectionException as ex:
             _LOGGER.error('Reading input registers failed! Inverter is unreachable.')
@@ -332,13 +332,13 @@ class PEVCModbusHub:
                 decoder = BinaryPayloadDecoder.fromRegisters(
                     discretereg_data.registers, byteorder=Endian.Big
                 )
-
+                _LOGGER.warning('Reading discrete data succeeded')
                 # devstatus = decoder.decode_16bit_uint()
                 # self.data["devstate"] = devstatus
 
                 return True
             else:
-
+                _LOGGER.warning('Reading discrete data FAILED')
                 return False
         else:
             mpvmode = '0'

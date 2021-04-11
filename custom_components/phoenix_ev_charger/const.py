@@ -13,7 +13,7 @@ PHOENIX_DEVICE_VARIANTS = {
 }
 
 SENSOR_TYPES = {
-    "DeviceState": ["Device State (A-F)", "devstate", None, None],
+    "DeviceState": ["Device State", "devstate", None, None],
     "EnergyChargeSequence": ["Energy Charge Sequence", "chargesequence", "Wh", "mdi:energy"],
     "ActualChargeCurrentSetting": ["Actual Charge Current Setting", "chargecurrentsetting", "A",
                                    "remoteChargeCurrentLimitation"],
@@ -47,7 +47,8 @@ DEVICE_STATUSSES = {
 }
 
 DIGITAL_OUT_FUNCTIONS = {
-    0:  "Inaktiv1Ladesteuerung im Status A",
+    0:  "Inaktiv",
+    1:  "Ladesteuerung im Status A",
     2:  "Ladesteuerung im Status B",
     3:  "Ladesteuerung im Status B und PWM EIN",
     4:  "Ladesteuerung im Status B und PWM AUS",
@@ -89,7 +90,8 @@ DIGITAL_OUT_FUNCTIONS = {
 }
 
 DIGITAL_IN_FUNCTIONS = {
-    0: "Inaktiv1Freigabe Ladevorgang permanentes High-Signal (Default für Eingang EN)",
+    0: "Inaktiv",
+    1: "Freigabe Ladevorgang permanentes High-Signal (Default für Eingang EN)",
     2: "Verfügbarkeit Ladestation (Default für Eingang XR)",
     3: "Rückmeldung Verriegelung Ladestecker (Default für Eingang LD)",
     4: "Verriegelung (permanentes High-Signal)",
