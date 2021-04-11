@@ -18,7 +18,8 @@ from pymodbus.exceptions import ConnectionException
 from pymodbus.payload import BinaryPayloadDecoder
 
 from .const import (DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DEVICE_STATUSSES,
-                    DOMAIN, CONF_DEVICE_MODEL, DEFAULT_DEVICE_MODEL)
+                    DOMAIN, CONF_DEVICE_MODEL, DEFAULT_DEVICE_MODEL,
+                    DIGITAL_OUT_FUNCTIONS, DIGITAL_IN_FUNCTIONS)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -189,7 +190,7 @@ class PEVCModbusHub:
     def read_modbus_data(self):
         return (
             self.read_modbus_holding_data()
-            #            and self.read_modbus_input_data()
+            and self.read_modbus_input_data()
             #            and self.read_modbus_coil_data()
             #            and self.read_modbus_discrete_data()
         )
@@ -212,10 +213,10 @@ class PEVCModbusHub:
                 charging_current = decoder.decode_16bit_uint()
                 self.data["chargecurrentsetting"] = charging_current
                 macstring = ''
-                for by in range(6):
-                    addr = decoder.decode_8bit_uint()
-                    macstring = macstring + str(hex(addr))
-                self.data["macaddress"] = str(macstring)
+                for by in range(3):
+                    addr = decoder.decode_16bit_uint()
+                    macstring = macstring + str(hex(addr))[2:3] + ':' + str(hex(addr))[4:5] + ':'
+                self.data["macaddress"] = str(macstring)[:-1]
 
                 sn = decoder.decode_string(12).decode('ascii')
                 self.data["serialnr"] = str(self.swap_ascii(sn, 12))
@@ -231,13 +232,28 @@ class PEVCModbusHub:
                 decoder.skip_bytes(4 * 2)
 
                 dig_out = decoder.decode_16bit_uint()
-                self.data["digouter"] = str(hex(dig_out))
+                if dig_out in DIGITAL_OUT_FUNCTIONS:
+                    self.data["digouter"] = str( DIGITAL_OUT_FUNCTIONS[dig_out])
+                else:
+                    self.data["digouter"] = str(hex(dig_out))
+
                 dig_out = decoder.decode_16bit_uint()
-                self.data["digoutlr"] = str(hex(dig_out))
+                if dig_out in DIGITAL_OUT_FUNCTIONS:
+                    self.data["digoutlr"] = str( DIGITAL_OUT_FUNCTIONS[dig_out])
+                else:
+                    self.data["digoutlr"] = str(hex(dig_out))
+
                 dig_out = decoder.decode_16bit_uint()
-                self.data["digoutvr"] = str(hex(dig_out))
+                if dig_out in DIGITAL_OUT_FUNCTIONS:
+                    self.data["digoutvr"] = str( DIGITAL_OUT_FUNCTIONS[dig_out])
+                else:
+                    self.data["digoutvr"] = str(hex(dig_out))
+
                 dig_out = decoder.decode_16bit_uint()
-                self.data["digoutcr"] = str(hex(dig_out))
+                if dig_out in DIGITAL_OUT_FUNCTIONS:
+                    self.data["digoutcr"] = str( DIGITAL_OUT_FUNCTIONS[dig_out])
+                else:
+                    self.data["digoutcr"] = str(hex(dig_out))
 
                 return True
             else:
@@ -259,7 +275,7 @@ class PEVCModbusHub:
             inputreg_data = self.read_input_registers(unit=255, address=100, count=57)
             connected = True
         except ConnectionException as ex:
-            _LOGGER.error('Reading inputregisters failed! Inverter is unreachable.')
+            _LOGGER.error('Reading input registers failed! Inverter is unreachable.')
             connected = False
 
         if connected:
@@ -267,12 +283,12 @@ class PEVCModbusHub:
                 decoder = BinaryPayloadDecoder.fromRegisters(
                     inputreg_data.registers, byteorder=Endian.Big
                 )
-
+                _LOGGER.warning('Reading input data succeeded')
                 devstatus = decoder.decode_string(2).decode('ascii')
-                self.data["devstate"] = devstatus
+                self.data["devstate"] = str(devstatus)
 
-                if devstatus in DEVICE_STATUSSES:
-                    self.data["devstate"] = DEVICE_STATUSSES[devstatus]
+                if str(devstatus) in DEVICE_STATUSSES:
+                    self.data["devstate"] = DEVICE_STATUSSES[str(devstatus)]
 
                 max_cable_current = decoder.decode_16bit_uint()
                 self.data["cablecapability"] = str(max_cable_current)
@@ -292,10 +308,10 @@ class PEVCModbusHub:
                 return False
         else:
             mpvmode = '0'
-            self.data["devstate"] = mpvmode
+            self.data["devstate"] = str(mpvmode)
 
-            if mpvmode in DEVICE_STATUSSES:
-                self.data["devstate"] = DEVICE_STATUSSES[mpvmode]
+            if str(mpvmode) in DEVICE_STATUSSES:
+                self.data["devstate"] = DEVICE_STATUSSES[str(mpvmode)]
 
             return True
 
