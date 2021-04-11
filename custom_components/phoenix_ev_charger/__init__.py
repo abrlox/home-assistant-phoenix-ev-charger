@@ -304,8 +304,8 @@ class PEVCModbusHub:
                 # errcodes1 = decoder.decode_16bit_uint()
                 return True
             else:
-
-                return False
+                _LOGGER.warning('Reading input data FAILED')
+                return True
         else:
             mpvmode = '0'
             self.data["devstate"] = str(mpvmode)
