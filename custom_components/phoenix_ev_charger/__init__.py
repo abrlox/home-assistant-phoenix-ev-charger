@@ -263,7 +263,7 @@ class PEVCModbusHub:
                 # read second block of holding registers
                 connected = False
                 try:
-                    holdingreg_data = self.read_holding_registers(unit=255, address=520, count=6)
+                    holdingreg_data = self.read_holding_registers(unit=255, address=520, count=9)
                     connected = True
                 except ConnectionException as ex:
                     _LOGGER.error('Reading holding data failed! Inverter is unreachable.')
@@ -304,6 +304,21 @@ class PEVCModbusHub:
                             self.data["diginin"] = str(DIGITAL_IN_FUNCTIONS[dig_in])
                         else:
                             self.data["diginin"] = str(hex(dig_in))
+
+                        # Ansteuerungszeit Verriegelung
+                        dummy = decoder.decode_16bit_uint()
+
+                        # Ansteuerungszeit Entriegelung
+                        dummy = decoder.decode_16bit_uint()
+
+                        # Delay Verriegelungs-Wiederholung
+                        dummy = decoder.decode_16bit_uint()
+
+                        chargcur = decoder.decode_16bit_uint()
+                        self.data["remotechargecurrentlimit"] = chargcur
+
+
+
         else:
             mpvmode = '0'
             self.data["devstate"] = mpvmode
@@ -317,7 +332,7 @@ class PEVCModbusHub:
     def read_modbus_input_data(self):
         connected = False
         try:
-            inputreg_data = self.read_input_registers(unit=255, address=100, count=10)
+            inputreg_data = self.read_input_registers(unit=255, address=100, count=36)
             connected = True
         except ConnectionException as ex:
             _LOGGER.error('Reading input registers failed! Inverter is unreachable.')
@@ -328,7 +343,8 @@ class PEVCModbusHub:
                 decoder = BinaryPayloadDecoder.fromRegisters(
                     inputreg_data.registers, byteorder=Endian.Big
                 )
-                devstatus = decoder.decode_string(2).decode('ascii')
+                devstatus = decoder.decode_string(1).decode('ascii')
+                devstatus = decoder.decode_string(1).decode('ascii')
                 self.data["devstate"] = str(devstatus)
 
                 if devstatus in DEVICE_STATUSSES:
@@ -345,7 +361,11 @@ class PEVCModbusHub:
                 fw_version = decoder.decode_string(4).decode('ascii')
                 self.data["fwvers"] = str(self.swap_ascii(fw_version, 4))
 
-                # errcodes1 = decoder.decode_16bit_uint()
+                decoder.skip_bytes(25*2)
+
+                charging_energy = decoder.decode_32bit_uint()
+                self.data["chargesequence"] = str(charging_energy)
+
                 return True
             else:
                 _LOGGER.warning('Reading input data FAILED')
