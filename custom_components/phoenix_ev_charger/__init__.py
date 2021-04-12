@@ -215,7 +215,6 @@ class PEVCModbusHub:
                 decoder = BinaryPayloadDecoder.fromRegisters(
                     holdingreg_data.registers, byteorder=Endian.Big
                 )
-                _LOGGER.warning('Reading holding data succeeded')
                 charging_current = decoder.decode_16bit_uint()
                 self.data["chargecurrentsetting"] = charging_current
                 macstring = ''
@@ -261,9 +260,50 @@ class PEVCModbusHub:
                 else:
                     self.data["digoutcr"] = str(hex(dig_out))
 
-                return True
-            else:
-                return False
+                # read second block of holding registers
+                connected = False
+                try:
+                    holdingreg_data = self.read_holding_registers(unit=255, address=520, count=6)
+                    connected = True
+                except ConnectionException as ex:
+                    _LOGGER.error('Reading holding data failed! Inverter is unreachable.')
+                    connected = False
+
+                if connected:
+                    if not holdingreg_data.isError():
+                        decoder = BinaryPayloadDecoder.fromRegisters(
+                            holdingreg_data.registers, byteorder=Endian.Big
+                        )
+
+                        dig_in = decoder.decode_16bit_uint()
+                        if dig_out in DIGITAL_IN_FUNCTIONS:
+                            self.data["diginld"] = str(DIGITAL_IN_FUNCTIONS[dig_in])
+                        else:
+                            self.data["diginld"] = str(hex(dig_in))
+
+                        dig_in = decoder.decode_16bit_uint()
+                        if dig_out in DIGITAL_IN_FUNCTIONS:
+                            self.data["diginen"] = str(DIGITAL_IN_FUNCTIONS[dig_in])
+                        else:
+                            self.data["diginen"] = str(hex(dig_in))
+
+                        dig_in = decoder.decode_16bit_uint()
+                        if dig_out in DIGITAL_IN_FUNCTIONS:
+                            self.data["diginml"] = str(DIGITAL_IN_FUNCTIONS[dig_in])
+                        else:
+                            self.data["diginml"] = str(hex(dig_in))
+
+                        dig_in = decoder.decode_16bit_uint()
+                        if dig_out in DIGITAL_IN_FUNCTIONS:
+                            self.data["diginxr"] = str(DIGITAL_IN_FUNCTIONS[dig_in])
+                        else:
+                            self.data["diginxr"] = str(hex(dig_in))
+
+                        dig_in = decoder.decode_16bit_uint()
+                        if dig_out in DIGITAL_IN_FUNCTIONS:
+                            self.data["diginin"] = str(DIGITAL_IN_FUNCTIONS[dig_in])
+                        else:
+                            self.data["diginin"] = str(hex(dig_in))
         else:
             mpvmode = '0'
             self.data["devstate"] = mpvmode
@@ -272,8 +312,7 @@ class PEVCModbusHub:
                 self.data["devstate"] = DEVICE_STATUSSES[mpvmode]
             else:
                 self.data["devstate"] = "Unknown"
-
-            return True
+        return connected
 
     def read_modbus_input_data(self):
         connected = False
@@ -289,12 +328,11 @@ class PEVCModbusHub:
                 decoder = BinaryPayloadDecoder.fromRegisters(
                     inputreg_data.registers, byteorder=Endian.Big
                 )
-                _LOGGER.warning('Reading input data succeeded')
                 devstatus = decoder.decode_string(2).decode('ascii')
                 self.data["devstate"] = str(devstatus)
 
-                if str(devstatus) in DEVICE_STATUSSES:
-                    self.data["devstate"] = DEVICE_STATUSSES[str(devstatus)]
+                if devstatus in DEVICE_STATUSSES:
+                    self.data["devstate"] = DEVICE_STATUSSES[devstatus]
 
                 max_cable_current = decoder.decode_16bit_uint()
                 self.data["cablecapability"] = str(max_cable_current)
@@ -335,8 +373,6 @@ class PEVCModbusHub:
 
         if connected:
             if not discretereg_data.isError():
-                _LOGGER.warning('Reading discrete data succeeded')
-
                 self.data["statdiginld" ] = str(DIGITAL_STATUS[discretereg_data.getBit(0)])
                 self.data["statdiginen" ] = str(DIGITAL_STATUS[discretereg_data.getBit(1)])
                 self.data["statdiginml" ] = str(DIGITAL_STATUS[discretereg_data.getBit(2)])
