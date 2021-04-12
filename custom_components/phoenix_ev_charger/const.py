@@ -11,6 +11,19 @@ PHOENIX_DEVICE_VARIANTS = {
     "EV-CC-AC1-M3",
     "EM-CP-PP",
 }
+
+BINARY_SENSOR_TYPES = {
+    "StatusDigInLD": ["Status Digital In LD", "statdiginld", None, "mdi:electric-switch"],
+    "StatusDigInEN": ["Status Digital In EN", "statdiginen", None, "mdi:electric-switch"],
+    "StatusDigInML": ["Status Digital In ML", "statdiginml", None, "mdi:electric-switch"],
+    "StatusDigInXR": ["Status Digital In XR", "statdiginxr", None, "mdi:electric-switch"],
+    "StatusDigInIN": ["Status Digital In IN", "statdiginin", None, "mdi:electric-switch"],
+    "StatusDigOutER": ["Status Digital Out ER", "statdigouter", None, "mdi:electric-switch"],
+    "StatusDigOutLR": ["Status Digital Out LR", "statdigoutlr", None, "mdi:electric-switch"],
+    "StatusDigOutVR": ["Status Digital Out VR", "statdigoutvr", None, "mdi:electric-switch"],
+    "StatusDigOutCR": ["Status Digital Out CR", "statdigoutcr", None, "mdi:electric-switch"],
+}
+
 SENSOR_TYPES = {
     "DeviceState": ["Device State", "devstate", None, None],
     "EnergyChargeSequence": ["Energy Charge Sequence", "chargesequence", "Wh", "mdi:counter"],
@@ -33,15 +46,15 @@ SENSOR_TYPES = {
     "MacAddress": ["MAC address", "macaddress", None, "mdi:network-outline"],
     "SerialNumber": ["Serial Number", "serialnr", None, None],
     "FirmwareVersion": ["Firmware version", "fwvers", None, None],
-    "StatusDigInLD": ["Status Digital In LD", "statdiginld", None, "mdi:electric-switch"],
-    "StatusDigInEN": ["Status Digital In EN", "statdiginen", None, "mdi:electric-switch"],
-    "StatusDigInML": ["Status Digital In ML", "statdiginml", None, "mdi:electric-switch"],
-    "StatusDigInXR": ["Status Digital In XR", "statdiginxr", None, "mdi:electric-switch"],
-    "StatusDigInIN": ["Status Digital In IN", "statdiginin", None, "mdi:electric-switch"],
-    "StatusDigOutER": ["Status Digital Out ER", "statdigouter", None, "mdi:electric-switch"],
-    "StatusDigOutLR": ["Status Digital Out LR", "statdigoutlr", None, "mdi:electric-switch"],
-    "StatusDigOutVR": ["Status Digital Out VR", "statdigoutvr", None, "mdi:electric-switch"],
-    "StatusDigOutCR": ["Status Digital Out CR", "statdigoutcr", None, "mdi:electric-switch"],
+#    "StatusDigInLD": ["Status Digital In LD", "statdiginld", None, "mdi:electric-switch"],
+#    "StatusDigInEN": ["Status Digital In EN", "statdiginen", None, "mdi:electric-switch"],
+#    "StatusDigInML": ["Status Digital In ML", "statdiginml", None, "mdi:electric-switch"],
+#    "StatusDigInXR": ["Status Digital In XR", "statdiginxr", None, "mdi:electric-switch"],
+#    "StatusDigInIN": ["Status Digital In IN", "statdiginin", None, "mdi:electric-switch"],
+#    "StatusDigOutER": ["Status Digital Out ER", "statdigouter", None, "mdi:electric-switch"],
+#    "StatusDigOutLR": ["Status Digital Out LR", "statdigoutlr", None, "mdi:electric-switch"],
+#    "StatusDigOutVR": ["Status Digital Out VR", "statdigoutvr", None, "mdi:electric-switch"],
+#    "StatusDigOutCR": ["Status Digital Out CR", "statdigoutcr", None, "mdi:electric-switch"],
 }
 
 

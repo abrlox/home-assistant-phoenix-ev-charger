@@ -19,7 +19,8 @@ from pymodbus.payload import BinaryPayloadDecoder
 
 from .const import (DEFAULT_NAME, DEFAULT_SCAN_INTERVAL, DEVICE_STATUSSES,
                     DOMAIN, CONF_DEVICE_MODEL, DEFAULT_DEVICE_MODEL,
-                    DIGITAL_OUT_FUNCTIONS, DIGITAL_IN_FUNCTIONS, DIGITAL_STATUS)
+                    DIGITAL_OUT_FUNCTIONS, DIGITAL_IN_FUNCTIONS, DIGITAL_STATUS,
+                    )
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ CONFIG_SCHEMA = vol.Schema(
     {DOMAIN: vol.Schema({cv.slug: PEVC_MODBUS_SCHEMA})}, extra=vol.ALLOW_EXTRA
 )
 
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "binary_sensor"]
 
 
 async def async_setup(hass, config):
@@ -108,6 +109,7 @@ class PEVCModbusHub:
         self._scan_interval = timedelta(seconds=scan_interval)
         self._unsub_interval_method = None
         self._sensors = []
+        self._binary_sensors = []
         self.data = {}
 
     @callback
@@ -133,16 +135,43 @@ class PEVCModbusHub:
             self._unsub_interval_method = None
             self.close()
 
+    @callback
+    def async_add_pevc_binary_sensor(self, update_callback):
+        """Listen for data updates."""
+        # This is the first sensor, set up interval.
+        if not self._binary_sensors:
+            self.connect()
+            self._unsub_interval_method = async_track_time_interval(
+                self._hass, self.async_refresh_modbus_data, self._scan_interval
+            )
+
+        self._binary_sensors.append(update_callback)
+
+    @callback
+    def async_remove_pevc_binary_sensor(self, update_callback):
+        """Remove data update."""
+        self._binary_sensors.remove(update_callback)
+
+        if not self._binary_sensors:
+            """stop the interval timer upon removal of last sensor"""
+            self._unsub_interval_method()
+            self._unsub_interval_method = None
+            self.close()
+
     async def async_refresh_modbus_data(self, _now: Optional[int] = None) -> None:
         """Time to update."""
         if not self._sensors:
-            return
+            if not self._binary_sensors:
+                return
 
         update_result = self.read_modbus_data()
 
         if update_result:
             for update_callback in self._sensors:
                 update_callback()
+            for update_callback in self._binary_sensors:
+                update_callback()
+
 
     @property
     def name(self):
