@@ -89,15 +89,9 @@ class PevcBinary_sensor(Entity):
         """Return the binary_sensor icon."""
         if self._key in self._hub.data:
             if self._hub.data[self._key] == DIGITAL_STATUS[True]:
-                if self._digin == True:
-                    return "mdi:electric-switch-closed"
-                else:
-                    return "mdi:lightbulb-on"
+                return "mdi:electric-switch-closed" if self._digin else return "mdi:lightbulb-on"
             else:
-                if self._digin == False:
-                    return "mdi:electric-switch"
-                else:
-                    return "mdi:lightbulb-outline"
+                return "mdi:electric-switch" if self._digin else return "mdi:lightbulb-outline"
         return self._icon
 
     @property
