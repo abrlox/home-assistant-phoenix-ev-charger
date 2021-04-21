@@ -30,6 +30,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             binary_sensor_info[1],
             binary_sensor_info[2],
             binary_sensor_info[3],
+            binary_sensor_info[4],
         )
         entities.append(binary_sensor)
 
@@ -40,7 +41,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class PevcBinary_sensor(Entity):
     """Representation of an PEVC Modbus binary_sensor."""
 
-    def __init__(self, platform_name, hub, device_info, name, key, unit, icon):
+    def __init__(self, platform_name, hub, device_info, name, key, unit, icon, digin):
         """Initialize the binary_sensor."""
         self._platform_name = platform_name
         self._hub = hub
@@ -49,6 +50,7 @@ class PevcBinary_sensor(Entity):
         self._unit_of_measurement = unit
         self._icon = icon
         self._device_info = device_info
+        self._digin = digin
         self._is_on = False
 
 
@@ -87,9 +89,15 @@ class PevcBinary_sensor(Entity):
         """Return the binary_sensor icon."""
         if self._key in self._hub.data:
             if self._hub.data[self._key] == DIGITAL_STATUS[True]:
-                return "mdi:lightbulb-on"
+                if self._digin == True:
+                    return "mdi:electric-switch-closed"
+                else:
+                    return "mdi:lightbulb-on"
             else:
-                return "mdi:lightbulb-outline"
+                if self._digin == False:
+                    return "mdi:electric-switch"
+                else:
+                    return "mdi:lightbulb-outline"
         return self._icon
 
     @property
