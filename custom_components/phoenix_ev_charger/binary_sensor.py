@@ -30,7 +30,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             binary_sensor_info[1],
             binary_sensor_info[2],
             binary_sensor_info[3],
-            binary_sensor_info[4],
+            binary_sensor_info[4]
         )
         entities.append(binary_sensor)
 
