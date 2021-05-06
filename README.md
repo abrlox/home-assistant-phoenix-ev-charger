@@ -1,4 +1,4 @@
-![GitHub all releases](https://img.shields.io/github/downloads/abrlox/home-assistant-phoenix-ev-charger/total) ![License](https://img.shields.io/github/license/abrlox/home-assistant-phoenix-ev-charger)
+![GitHub all releases](https://img.shields.io/github/downloads/abrlox/home-assistant-phoenix-ev-charger/total) ![License](https://img.shields.io/github/license/abrlox/home-assistant-phoenix-ev-charger) [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
 # home-assistant-phoenix-ev-charger
 
