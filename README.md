@@ -2,7 +2,7 @@
 
 # home-assistant-phoenix-ev-charger
 
-Home Assistant Integration for communicating with Phoenix Contact EV Charge Controllers found e.g. in ESL "Walli LIGHT" and "Walli LIGHT pro" wallboxes. Communication s done via Modbus TCP, so no username/password is needed. 
+Home Assistant Integration for communicating with Phoenix Contact EV Charge Controllers found e.g. in ESL "Walli LIGHT" and "Walli LIGHT pro" wallboxes. Communication is done via Modbus TCP, so no username/password is needed. 
 
 Currently only Phoenix Contact EV-CC-AC1-M3-xx charge controllers (Walli Light pro) are tested (works for me).
 

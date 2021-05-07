@@ -1,4 +1,4 @@
 {
     "name": "Phoenix EV Charger",
-    "content_in_root": False,
+    "content_in_root": "False",
 }
