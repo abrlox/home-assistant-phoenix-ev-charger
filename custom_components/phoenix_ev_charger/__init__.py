@@ -382,8 +382,12 @@ class PEVCModbusHub:
                 max_cable_current = decoder.decode_16bit_uint()
                 self.data["cablecapability"] = str(max_cable_current)
 
-                charging_time = decoder.decode_32bit_uint()
-                self.data["chargingduration"] = str(charging_time)
+
+                charging_time_low = decoder.decode_16bit_uint()
+                charging_time_high = decoder.decode_16bit_uint()
+                minutes, secs = divmod(( charging_time_high << 16 ) + charging_time_low, 60)
+                hours, minutes = divmod(minutes, 60)
+                self.data["chargingduration"] = str("%d:%02d:%02d" % (hours, minutes, secs))
 
                 dip_switches = decoder.decode_16bit_uint()
 
@@ -392,7 +396,9 @@ class PEVCModbusHub:
 
                 decoder.skip_bytes(25*2)
 
-                charging_energy = decoder.decode_32bit_uint()
+                charging_energy_low = decoder.decode_16bit_uint()
+                charging_energy_high = decoder.decode_16bit_uint()
+                charging_energy = ( charging_energy_high << 16 ) + charging_energy_low
                 self.data["chargesequence"] = str(charging_energy)
 
                 return True

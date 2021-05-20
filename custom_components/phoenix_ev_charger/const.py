@@ -32,7 +32,7 @@ SENSOR_TYPES = {
                                       "mdi:current-ac"],
     "CableAssemblyCapability": ["Capability of Cable Assembly", "cablecapability", "A",
                                 "mdi:current-ac"],
-    "ActiveChargingDuration": ["Active Charging Duration", "chargingduration", "s", "mdi:clock-start"],
+    "ActiveChargingDuration": ["Active Charging Duration", "chargingduration", "h", "mdi:clock-start"],
     "DigInLD": ["Input LD", "diginld", None, "mdi:wrench-outline"],
     "DigInEN": ["Input EN", "diginen", None, "mdi:wrench-outline"],
     "DigInML": ["Input ML", "diginml", None, "mdi:wrench-outline"],
@@ -98,6 +98,7 @@ DIGITAL_OUT_FUNCTIONS = {
     37: "Fahrzeug angeschlossen im Status B oder C oder D",
     38: "Reserviert für zukünftige Funktion",
     39: "Autorisierungsstatus (Blinken: Autorisierung in Arbeit, Permanent: Freigabe liegt vor)",
+    0x29: "Status A oder B1 Authorisierung Blinken",
 }
 
 DIGITAL_IN_FUNCTIONS = {
@@ -165,7 +166,8 @@ EN_DIGITAL_OUT_FUNCTIONS = {
     36: "Status D, vehicle rejected",
     37: "Vehicle connected in status B or C or D",
     38: "Reserved for future function",
-    39: "Authorization status (flashing: authorization in progress, permanent: enable is- sued)",
+    39: "Authorization status (flashing: authorization in progress, permanent: enable issued)",
+    0x29: "State A or B1 Authorize Blink",
 }
 
 EN_DIGITAL_IN_FUNCTIONS = {
