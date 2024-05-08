@@ -53,14 +53,14 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
 
     async def async_turn_on(self):
         """Turn On method."""
-        _LOGGER.error(
+        _LOGGER.debug(
             "Sending ON request to SWITCH device %s", self._name
         )
         if not self._hub._client.connected:
             self._hub._client.connect()
         self._hub._client.write_coil(address=400,value=True)
         self._state = STATE_ON
-        self.schedule_update_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
 
     async def async_turn_off(self):
         """Turn Off method."""
@@ -71,7 +71,7 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
             self._hub._client.connect()
         self._hub._client.write_coil(address=400,value=False)
         self._state = STATE_OFF
-        self.schedule_update_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
 
     @property
     def should_poll(self):
