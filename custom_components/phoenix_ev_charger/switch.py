@@ -94,7 +94,7 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
         _LOGGER.debug("Device %s - availability: %s", self._name, self._available)
         return True if self._available == 1 else False
     def _update_state(self):
-        _LOGGER.debug("REFRESHING SWITCH via update_state %s - %s", self._name)
+        _LOGGER.debug("REFRESHING SWITCH via update_state %s", self._name)
         self._available = 0
         if self._hub._client.connected:
             self._available = 1
@@ -114,7 +114,7 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
     async def async_update(self):
         """Return sensor state."""
         self._data = self.hass.data[DOMAIN]["data"]
-        _LOGGER.debug("REFRESHING SWITCH %s - %s", self._name)
+        _LOGGER.debug("REFRESHING SWITCH %s", self._name)
         self._available = 0
         if self._hub._client.connected:
             self._available = 1
