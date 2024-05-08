@@ -8,7 +8,6 @@ from homeassistant.const import CONF_NAME
 # STATE_ON, STATE_OFF,
 STATE_ON = True
 STATE_OFF = False
-
 from . import PhoenixEvDevice
 from pymodbus.client import ModbusTcpClient
 from .const import ATTR_MANUFACTURER, DEVICE_STATUSSES, DOMAIN, SWITCHES, DIGITAL_STATUS
@@ -65,7 +64,7 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
 
     async def async_turn_off(self):
         """Turn Off method."""
-        _LOGGER.error(
+        _LOGGER.debug(
             "Sending OFF request to SWITCH device %s (%s)",  self._name
         )
         if not self._hub._client.connected:
