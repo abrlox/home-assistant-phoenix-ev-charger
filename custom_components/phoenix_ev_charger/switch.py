@@ -4,7 +4,10 @@ try:
 except ImportError:
     from homeassistant.components.switch import SwitchDevice as SwitchEntity
 
-from homeassistant.const import STATE_ON, STATE_OFF, CONF_NAME
+from homeassistant.const import CONF_NAME
+# STATE_ON, STATE_OFF,
+STATE_ON = True
+STATE_OFF = False
 
 from . import PhoenixEvDevice
 from pymodbus.client import ModbusTcpClient
