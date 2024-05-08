@@ -91,6 +91,23 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
         """Return availability."""
         _LOGGER.debug("Device %s - availability: %s", self._name, self._available)
         return True if self._available == 1 else False
+    def _update_state(self):
+        _LOGGER.debug("REFRESHING SWITCH via update_state %s - %s", self._name)
+        self._available = 0
+        if self._hub._client.connected:
+            self._available = 1
+            chargestate_data = self._hub._client.read_coils(address=400, count=1, slave=0)
+            charging = chargestate_data.bits[0]
+            if charging:
+                self._state = STATE_ON
+            else:
+                self._state = STATE_OFF
+            _LOGGER.debug(self._state)
+            return self._state
+        else:
+            _LOGGER.debug("Hub not connected - SWITCH %s - %s", self._name, self)
+            self._available = 0
+        return False
 
     async def async_update(self):
         """Return sensor state."""
@@ -108,5 +125,6 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
             _LOGGER.debug(self._state)
             return self._state
         else:
+            _LOGGER.debug("Hub not connected - SWITCH %s - %s", self._name, self)
             self._available = 0
         return False
