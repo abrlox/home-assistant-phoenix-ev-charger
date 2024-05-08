@@ -4,10 +4,8 @@ try:
 except ImportError:
     from homeassistant.components.switch import SwitchDevice as SwitchEntity
 
-from homeassistant.const import STATE_ON, STATE_OFF
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (CONF_HOST, CONF_PORT,
-                                 CONF_SCAN_INTERVAL)
+from homeassistant.const import STATE_ON, STATE_OFF, CONF_NAME
+
 from . import PhoenixEvDevice
 from pymodbus.client import ModbusTcpClient
 from .const import ATTR_MANUFACTURER, DEVICE_STATUSSES, DOMAIN, SWITCHES, DIGITAL_STATUS
@@ -16,14 +14,15 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Phoenix ev Sensor setup platform."""
+    hub_name = entry.data[CONF_NAME]
+    hub = hass.data[DOMAIN][hub_name]["hub"]
+
     _LOGGER.debug("Phoenix ev charger Switch component running ...")
-    host = ConfigEntry.data[CONF_HOST]
-    port = ConfigEntry.data[CONF_PORT]
     devices = []
     for sw in SWITCHES:
         devices.append(
             PhoenixEVSwitch(
-                SWITCHES[sw][0], SWITCHES[sw][1], host, port
+                SWITCHES[sw][0], SWITCHES[sw][1], hub
             )
         )
         _LOGGER.debug("Adding device: %s", SWITCHES[sw][0])
@@ -35,12 +34,11 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, name, icon, host, port):
+    def __init__(self, name, icon, hub):
         """Initialize the sensor."""
         self._pre = "sw_"
         self._name = name
-        self._host = host
-        self._port = port
+        self._hub = hub
         self._state = False
         self._icon = icon
         self._data = None
@@ -53,26 +51,24 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
 
     async def async_turn_on(self):
         """Turn On method."""
-        client = ModbusTcpClient(host=self._host, port=self._data, timeout=5)
-        client.connect()
         _LOGGER.error(
             "Sending ON request to SWITCH device %s (%s)", self._name
         )
-        client.write_coil(address=400,value=True)
+        if not self._hub._client.connected:
+            self._hub._client.connect()
+        self._hub._client.write_coil(address=400,value=True)
         self._state = STATE_ON
-        client.close()
         self.schedule_update_ha_state()
 
     async def async_turn_off(self):
         """Turn Off method."""
-        client = ModbusTcpClient(host=self._host, port=self._data, timeout=5)
-        client.connect()
         _LOGGER.error(
             "Sending OFF request to SWITCH device %s (%s)",  self._name
         )
-        client.write_coil(address=400,value=False)
+        if not self._hub._client.connected:
+            self._hub._client.connect()
+        self._hub._client.write_coil(address=400,value=False)
         self._state = STATE_OFF
-        client.close()
         self.schedule_update_ha_state()
 
     @property
@@ -101,17 +97,14 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
         self._data = self.hass.data[DOMAIN]["data"]
         _LOGGER.debug("REFRESHING SWITCH %s - %s", self._name)
         self._available = 0
-        client = ModbusTcpClient(host=self._host, port=self._data, timeout=5)
-        client.connect()
-        if client.connected:
+        if self._hub._client.connected:
             self._available = 1
-            chargestate_data = client.read_coils(address=400, count=1, slave=0)
+            chargestate_data = self._hub._client.read_coils(address=400, count=1, slave=0)
             charging = chargestate_data.bits[0]
             if charging:
                 self._state = STATE_ON
             else:
                 self._state = STATE_OFF
             _LOGGER.debug(self._state)
-            client.close()
             return self._state
         return False
