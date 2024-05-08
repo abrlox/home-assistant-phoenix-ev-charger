@@ -12,7 +12,8 @@ from homeassistant.const import (CONF_HOST, CONF_NAME, CONF_PORT,
                                  CONF_SCAN_INTERVAL)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_interval
-from pymodbus.client.sync import ModbusTcpClient
+# remove sync and use ModbusTcpClient directly (change from 2.5.3 to 3.0.0)
+from pymodbus.client import ModbusTcpClient
 from pymodbus.constants import Endian
 from pymodbus.exceptions import ConnectionException
 from pymodbus.payload import BinaryPayloadDecoder
@@ -40,7 +41,7 @@ CONFIG_SCHEMA = vol.Schema(
     {DOMAIN: vol.Schema({cv.slug: PEVC_MODBUS_SCHEMA})}, extra=vol.ALLOW_EXTRA
 )
 
-PLATFORMS = ["sensor", "binary_sensor"]
+PLATFORMS = ["sensor", "binary_sensor", "switch"]
 
 
 async def async_setup(hass, config):
@@ -110,6 +111,7 @@ class PEVCModbusHub:
         self._unsub_interval_method = None
         self._sensors = []
         self._binary_sensors = []
+        self._switches = []
         self.data = {}
 
     @callback
@@ -242,7 +244,7 @@ class PEVCModbusHub:
         if connected:
             if not holdingreg_data.isError():
                 decoder = BinaryPayloadDecoder.fromRegisters(
-                    holdingreg_data.registers, byteorder=Endian.Big
+                    holdingreg_data.registers, byteorder=Endian.BIG
                 )
                 charging_current = decoder.decode_16bit_uint()
                 self.data["chargecurrentsetting"] = charging_current
@@ -301,7 +303,7 @@ class PEVCModbusHub:
                 if connected:
                     if not holdingreg_data.isError():
                         decoder = BinaryPayloadDecoder.fromRegisters(
-                            holdingreg_data.registers, byteorder=Endian.Big
+                            holdingreg_data.registers, byteorder=Endian.BIG
                         )
 
                         dig_in = decoder.decode_16bit_uint()
@@ -370,7 +372,7 @@ class PEVCModbusHub:
         if connected:
             if not inputreg_data.isError():
                 decoder = BinaryPayloadDecoder.fromRegisters(
-                    inputreg_data.registers, byteorder=Endian.Big
+                    inputreg_data.registers, byteorder=Endian.BIG
                 )
                 devstatus = decoder.decode_string(1).decode('ascii')
                 devstatus = decoder.decode_string(1).decode('ascii')
