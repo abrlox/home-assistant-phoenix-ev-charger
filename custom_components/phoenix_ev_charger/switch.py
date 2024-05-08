@@ -14,13 +14,9 @@ from .const import ATTR_MANUFACTURER, DEVICE_STATUSSES, DOMAIN, SWITCHES, DIGITA
 
 _LOGGER = logging.getLogger(__name__)
 
-
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_entry(hass, entry, async_add_entities):
     """Phoenix ev Sensor setup platform."""
     _LOGGER.debug("Phoenix ev charger Switch component running ...")
-    if discovery_info is None:
-        _LOGGER.error("No Sensor(s) discovered")
-        return
     host = ConfigEntry.data[CONF_HOST]
     port = ConfigEntry.data[CONF_PORT]
     devices = []
