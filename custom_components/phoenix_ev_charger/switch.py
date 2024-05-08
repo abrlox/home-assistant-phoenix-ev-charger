@@ -42,7 +42,7 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
         self._state = False
         self._icon = icon
         self._data = None
-        self._available = 0
+        self._available = 1
 
     @property
     def is_on(self):
@@ -107,4 +107,6 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
                 self._state = STATE_OFF
             _LOGGER.debug(self._state)
             return self._state
+        else:
+            self._available = 0
         return False
