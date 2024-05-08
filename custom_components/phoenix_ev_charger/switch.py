@@ -54,7 +54,7 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
     async def async_turn_on(self):
         """Turn On method."""
         _LOGGER.error(
-            "Sending ON request to SWITCH device %s (%s)", self._name
+            "Sending ON request to SWITCH device %s", self._name
         )
         if not self._hub._client.connected:
             self._hub._client.connect()
@@ -65,7 +65,7 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
     async def async_turn_off(self):
         """Turn Off method."""
         _LOGGER.debug(
-            "Sending OFF request to SWITCH device %s (%s)",  self._name
+            "Sending OFF request to SWITCH device %s",  self._name
         )
         if not self._hub._client.connected:
             self._hub._client.connect()
