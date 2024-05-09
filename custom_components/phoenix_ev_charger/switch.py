@@ -75,8 +75,8 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
 
     @property
     def should_poll(self):
-        """No polling needed."""
-        return False
+        """polling needed."""
+        return True
 
     @property
     def name(self):
@@ -93,34 +93,21 @@ class PhoenixEVSwitch(PhoenixEvDevice, SwitchEntity):
         """Return availability."""
         _LOGGER.debug("Device %s - availability: %s", self._name, self._available)
         return True if self._available == 1 else False
-    def _update_state(self):
-        _LOGGER.debug("REFRESHING SWITCH via update_state %s", self._name)
-        self._available = 0
-        if self._hub._client.connected:
-            self._available = 1
-            chargestate_data = self._hub._client.read_coils(address=400, count=1, slave=0)
-            charging = chargestate_data.bits[0]
-            if charging:
-                self._state = STATE_ON
-            else:
-                self._state = STATE_OFF
-            _LOGGER.debug(self._state)
-            return self._state
-        else:
-            _LOGGER.debug("Hub not connected - SWITCH %s - %s", self._name, self)
-            self._available = 0
-        return False
 
     async def async_update(self):
-        """Return sensor state."""
-        self._data = self.hass.data[DOMAIN]["data"]
-        _LOGGER.debug("REFRESHING SWITCH %s", self._name)
+        _LOGGER.debug("REFRESHING SWITCH via async_update %s", self._name)
         self._available = 0
         if self._hub._client.connected:
             self._available = 1
             chargestate_data = self._hub._client.read_coils(address=400, count=1, slave=0)
             charging = chargestate_data.bits[0]
             if charging:
+                _LOGGER.debug("Charging by Switch %s", self._name)
+            chargebyrfid_data = self._hub._client.read_coils(address=436, count=1, slave=0)
+            chargingbyrfid = chargebyrfid_data.bits[0]
+            if chargingbyrfid:
+                _LOGGER.debug("Charging by RFID %s", self._name)
+            if charging or chargingbyrfid:
                 self._state = STATE_ON
             else:
                 self._state = STATE_OFF
