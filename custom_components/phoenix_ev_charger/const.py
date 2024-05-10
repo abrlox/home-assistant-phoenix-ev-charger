@@ -12,6 +12,10 @@ PHOENIX_DEVICE_VARIANTS = {
     "EM-CP-PP",
 }
 
+SWITCHES = {
+    "wallbox": ["wallbox", "mdi:electric-switch", True],
+}
+
 BINARY_SENSOR_TYPES = {
     "StatusDigInLD": ["Input LD", "statdiginld", None, "mdi:electric-switch", True],
     "StatusDigInEN": ["Input EN", "statdiginen", None, "mdi:electric-switch", True],
@@ -199,3 +203,5 @@ DIGITAL_STATUS = {
     False: "Off",
     True: "On",
 }
+
+DATA_UPDATED = "phoenixev_{}_data_updated"

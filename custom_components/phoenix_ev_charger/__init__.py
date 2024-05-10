@@ -4,7 +4,7 @@ import logging
 import threading
 from datetime import timedelta
 from typing import Optional
-
+from .const import DATA_UPDATED
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
@@ -12,7 +12,11 @@ from homeassistant.const import (CONF_HOST, CONF_NAME, CONF_PORT,
                                  CONF_SCAN_INTERVAL)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_interval
-from pymodbus.client.sync import ModbusTcpClient
+from homeassistant.helpers.dispatcher import (
+    async_dispatcher_connect,
+)
+from homeassistant.helpers.entity import Entity
+from pymodbus.client import ModbusTcpClient
 from pymodbus.constants import Endian
 from pymodbus.exceptions import ConnectionException
 from pymodbus.payload import BinaryPayloadDecoder
@@ -40,7 +44,7 @@ CONFIG_SCHEMA = vol.Schema(
     {DOMAIN: vol.Schema({cv.slug: PEVC_MODBUS_SCHEMA})}, extra=vol.ALLOW_EXTRA
 )
 
-PLATFORMS = ["sensor", "binary_sensor"]
+PLATFORMS = ["sensor", "binary_sensor", "switch"]
 
 
 async def async_setup(hass, config):
@@ -110,6 +114,7 @@ class PEVCModbusHub:
         self._unsub_interval_method = None
         self._sensors = []
         self._binary_sensors = []
+        self._switches = []
         self.data = {}
 
     @callback
@@ -242,7 +247,7 @@ class PEVCModbusHub:
         if connected:
             if not holdingreg_data.isError():
                 decoder = BinaryPayloadDecoder.fromRegisters(
-                    holdingreg_data.registers, byteorder=Endian.Big
+                    holdingreg_data.registers, byteorder=Endian.BIG
                 )
                 charging_current = decoder.decode_16bit_uint()
                 self.data["chargecurrentsetting"] = charging_current
@@ -301,7 +306,7 @@ class PEVCModbusHub:
                 if connected:
                     if not holdingreg_data.isError():
                         decoder = BinaryPayloadDecoder.fromRegisters(
-                            holdingreg_data.registers, byteorder=Endian.Big
+                            holdingreg_data.registers, byteorder=Endian.BIG
                         )
 
                         dig_in = decoder.decode_16bit_uint()
@@ -370,7 +375,7 @@ class PEVCModbusHub:
         if connected:
             if not inputreg_data.isError():
                 decoder = BinaryPayloadDecoder.fromRegisters(
-                    inputreg_data.registers, byteorder=Endian.Big
+                    inputreg_data.registers, byteorder=Endian.BIG
                 )
                 devstatus = decoder.decode_string(1).decode('ascii')
                 devstatus = decoder.decode_string(1).decode('ascii')
@@ -450,3 +455,24 @@ class PEVCModbusHub:
                 self.data["devstate"] = DEVICE_STATUSSES[mpvmode]
 
             return True
+
+class PhoenixEvDevice(Entity):
+    """PhoenixEvDevice Device Common Object."""
+
+    def __init__(self):
+        """Log PhoenixEvDevice initialization."""
+        _LOGGER.error("PhoenixEvDevice %s", )
+
+    async def async_added_to_hass(self):
+        """Add Callbacks for update."""
+        device_id = str(self._pre) + str(self._name)
+        _LOGGER.debug(
+            "Callback added for %s, %s",
+            DATA_UPDATED.format(device_id),
+            DATA_UPDATED.format(self._name),
+        )
+        async_dispatcher_connect(self.hass, DATA_UPDATED.format(device_id), self._refresh)
+
+    @callback
+    def _refresh(self):
+        self.async_schedule_update_ha_state(True)
